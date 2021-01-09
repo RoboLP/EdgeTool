@@ -155,9 +155,9 @@ namespace Mygod.Edge.Tool
         public string Title { get; }
         public string Description { get; }
         public double GlobalPercent => Achievements.GlobalPercents != null && Achievements.GlobalPercents
-            .ContainsKey(ApiName) ? double.Parse(Achievements.GlobalPercents[ApiName]) : double.NaN;
+            .ContainsKey(ApiName) ? double.Parse(Achievements.GlobalPercents[ApiName], CultureInfo.InvariantCulture) : double.NaN;
         public string GlobalPercentText => Achievements.GlobalPercents != null && Achievements.GlobalPercents
-            .ContainsKey(ApiName) ? Achievements.GlobalPercents[ApiName] : null;
+            .ContainsKey(ApiName) ? Math.Round(double.Parse(Achievements.GlobalPercents[ApiName], CultureInfo.InvariantCulture), 1).ToString() : null;
 
         public string Help { get; }
         public Uri PictureUri => new Uri(Path.Combine(CurrentApp.Directory, $"Resources/Achievements/{ApiName}.jpg"),
