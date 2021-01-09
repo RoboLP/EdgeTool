@@ -1,0 +1,520 @@
+﻿<m:GlassWindow x:Class="Mygod.Edge.Tool.MainWindow"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:local="clr-namespace:Mygod.Edge.Tool"
+               xmlns:m="http://schemas.mygod.be/wpf"
+               Title="{x:Static m:CurrentApp.Title}"
+               Icon="{x:Static m:CurrentApp.MainIcon}"
+               Closing="OnClosing"
+               Height="570" Width="920">
+    <m:GlassWindow.Resources>
+        <RoutedCommand x:Key="OpenSettingsIni" />
+    </m:GlassWindow.Resources>
+    <m:GlassWindow.CommandBindings>
+        <CommandBinding Command="{StaticResource OpenSettingsIni}"
+                        Executed="OpenSettingsIni" CanExecute="SettingsIniCanOpen" />
+    </m:GlassWindow.CommandBindings>
+    <m:GlassWindow.TaskbarItemInfo>
+        <TaskbarItemInfo />
+    </m:GlassWindow.TaskbarItemInfo>
+    <Grid>
+        <Grid.Resources>
+            <local:AchievementStatusConverter x:Key="AchievementStatus" />
+            <local:VisibleWhileNotNullConverter x:Key="VisibleWhileNotNull" />
+            <local:SecondsConverter x:Key="Seconds" />
+            <local:BinFilePathConverter x:Key="BinFilePath" />
+            <local:GlobalPercentTextConverter x:Key="GlobalPercentText" />
+            <local:FilesConverter x:Key="Files" />
+            <Style x:Key="AlignRight" TargetType="{x:Type TextBlock}">
+                <Setter Property="HorizontalAlignment" Value="Right" />
+            </Style>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="5" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Label Target="{Binding ElementName=GamePath}" Effect="{DynamicResource GlowingEffect}">
+                <StackPanel Orientation="Horizontal">
+                    <AccessText Text="{x:Static local:Localization.EnterPath_EnterOr}" />
+                    <TextBlock VerticalAlignment="Center">
+                        <Hyperlink Click="Browse">
+                            <Run Text="{x:Static local:Localization.EnterPath_Browse}" />
+                        </Hyperlink>
+                    </TextBlock>
+                    <AccessText Text="{x:Static local:Localization.EnterPath_YourGamePath}" />
+                </StackPanel>
+            </Label>
+            <ComboBox Grid.Column="1" Name="GamePath" x:FieldModifier="private" VerticalAlignment="Center"
+                      IsEditable="True" />
+            <Button Grid.Column="3" Content="{x:Static local:Localization.LoadButton}" VerticalAlignment="Center"
+                    Click="Load" />
+            <Button Grid.Column="5" Content="{x:Static local:Localization.RunGameButton}" VerticalAlignment="Center"
+                    Click="RunGame" Name="RunGameButton" x:FieldModifier="private" IsEnabled="True" />
+            <Button Grid.Column="7" Content="{x:Static local:Localization.ToolboxButton}" VerticalAlignment="Center"
+                    Click="PopContextMenu" ContextMenuService.Placement="Bottom">
+                <Button.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="{x:Static local:Localization.RecordKeyEventItem}"
+                                  Click="RecordKeyEvent" />
+                        <MenuItem Header="{x:Static local:Localization.ConvertMobileLevelsItem}"
+                                  Click="ConvertMobiLevel" />
+                        <MenuItem Header="{x:Static local:Localization.CompileMobileVersionItem}"
+                                  Click="CompileMobileVersion" Name="CompileMobileVersionButton" />
+                        <Separator />
+                        <MenuItem Header="{x:Static local:Localization.OpenSettingsIniEdgeItem}"
+                                  Command="{StaticResource OpenSettingsIni}" CommandParameter="EDGE" />
+                        <MenuItem Header="{x:Static local:Localization.OpenSettingsIniEdgeDemoItem}"
+                                  Command="{StaticResource OpenSettingsIni}" CommandParameter="EDGE Demo" />
+                        <MenuItem Header="{x:Static local:Localization.OpenSettingsIniEdgeEpicItem}"
+                                  Command="{StaticResource OpenSettingsIni}" CommandParameter="EDGE Epic" />
+                        <Separator />
+                        <MenuItem Header="{x:Static local:Localization.CheckForUpdatesItem}"
+                                  Click="CheckForUpdates" />
+                        <MenuItem Header="{x:Static local:Localization.Help}" Click="Help" />
+                    </ContextMenu>
+                </Button.ContextMenu>
+            </Button>
+        </Grid>
+        <TabControl Name="Tabs" x:FieldModifier="private" Grid.Row="2">
+            <TabItem Header="{x:Static local:Localization.BrowseAchievementsTab}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="5" />
+                        <RowDefinition />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="5" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="5" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="5" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Label Content="{x:Static local:Localization.SelectUser}" />
+                    <ComboBox Grid.Column="1" VerticalAlignment="Center" ItemsSource="{x:Static local:Users.Current}"
+                              SelectedItem="{Binding CurrentUser, Source={x:Static local:Users.Current}}"
+                              SelectionChanged="RefreshAchievementsList">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:User}">
+                                <TextBlock>
+                                    <Run Text="{Binding Name, Mode=OneWay}" />
+                                    (<Run Text="{Binding AchievedAchievementsCount, Mode=OneWay}" />/<Run
+                                          Text="{x:Static local:Achievements.CountString}" />,
+                                    <Run Text="{Binding AchievedPoints, Mode=OneWay}" />/<Run
+                                         Text="{Binding Points, Mode=OneWay}" />
+                                    <Run Text="{x:Static local:Localization.Points}" />)
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Name="SwitchProfileButton" x:FieldModifier="private"
+                            Content="{x:Static local:Localization.SwitchToSelectedProfileButton}"
+                            Click="SetDefaultProfile" Grid.Column="3" VerticalAlignment="Center" IsEnabled="False" />
+                    <Button Content="{x:Static local:Localization.RefreshGlobalPlayerProgressButton}"
+                            Click="RefreshGlobalPercent" Grid.Column="5" VerticalAlignment="Center"
+                            ToolTip="{x:Static local:Localization.RequireNetworkTooltip}" />
+                    <Button Content="{x:Static local:Localization.SortButton}" ContextMenuService.Placement="Bottom"
+                            Click="PopContextMenu" Grid.Column="7" VerticalAlignment="Center">
+                        <Button.ContextMenu>
+                            <ContextMenu MenuItem.Click="SortAchievements">
+                                <MenuItem Header="{x:Static local:Localization.SortDefaultOrder}" />
+                                <MenuItem Header="{x:Static local:Localization.SortByAchieved}"
+                                          Tag="CurrentUserAchieved" />
+                                <MenuItem Header="{x:Static local:Localization.SortByApiName}" Tag="ApiName" />
+                                <MenuItem Header="{x:Static local:Localization.SortByTitle}" Tag="Title" />
+                                <MenuItem Header="{x:Static local:Localization.SortByDescription}"
+                                          Tag="Description" />
+                                <MenuItem Header="{x:Static local:Localization.SortByPoints}"
+                                          Tag="Points_DESCENDING" />
+                                <MenuItem Header="{x:Static local:Localization.SortByGlobalPlayerProgress}"
+                                          Tag="GlobalPercent_DESCENDING" />
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                    </Button>
+                    <ListBox Name="AchievementsList" x:FieldModifier="private" Grid.Row="2" Grid.ColumnSpan="8"
+                             ItemsSource="{x:Static local:Achievements.Current}" VirtualizingPanel.ScrollUnit="Pixel"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             HorizontalContentAlignment="Stretch" MouseRightButtonUp="ForceUnlockAchievement">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:Achievement}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="5" />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="5" />
+                                        <ColumnDefinition Width="32" />
+                                        <ColumnDefinition Width="5" />
+                                    </Grid.ColumnDefinitions>
+                                    <Image Height="64" Source="{Binding PictureUri}" />
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                        <TextBlock TextWrapping="Wrap" ToolTip="{Binding ApiName}">
+                                            <Run Text="{Binding Title, Mode=OneWay}" FontSize="18"
+                                                 FontWeight="Bold" />
+                                            (<Run Text="{Binding Points, Mode=OneWay}" />
+                                            <Run Text="{x:Static local:Localization.Points}" />)
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding Description, Mode=OneWay}" TextWrapping="Wrap"
+                                                   Visibility="{Binding Description,
+                                                       Converter={StaticResource VisibleWhileNotNull}}" />
+                                        <Grid Margin="0,3,0,0">
+                                            <m:AnimatedProgressBar Value="{Binding GlobalPercent, Mode=OneWay}" />
+                                            <TextBlock Margin="5,0" VerticalAlignment="Center">
+                                                <Run Text="{x:Static local:Localization.GlobalPlayerProgress}" /><Run
+                                                    Text="{Binding GlobalPercentText, Mode=OneWay,
+                                                                   Converter={StaticResource GlobalPercentText}}" />
+                                            </TextBlock>
+                                        </Grid>
+                                    </StackPanel>
+                                    <ContentControl Content="{Binding Converter={StaticResource AchievementStatus}}"
+                                                    Grid.Column="4" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <TextBlock Name="AchievementsTip" x:FieldModifier="private" Grid.Row="3" Grid.ColumnSpan="4"
+                               Visibility="Collapsed" Margin="0,5,0,0"
+                               Text="{x:Static local:Localization.BrowseAchievementsTabHint}" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="{x:Static local:Localization.ManageEdgeModsTab}" AllowDrop="True"
+                     PreviewDragEnter="OnEdgeModDragEnter" PreviewDragOver="OnDragOver" PreviewDragLeave="OnDragLeave"
+                     PreviewDrop="OnEdgeModDrop" IsEnabled="{Binding IsEnabled, ElementName=RunGameButton}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2*" />
+                        <RowDefinition Height="5" />
+                        <RowDefinition />
+                        <RowDefinition Height="5" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <m:DataGridEx x:Name="EdgeModGrid" x:FieldModifier="private" AutoGenerateColumns="False"
+                                  SelectionMode="Single" SelectionChanged="UpdateDescription"
+                                  VirtualizingPanel.ScrollUnit="Pixel">
+                        <m:DataGridEx.Columns>
+                            <DataGridTextColumn Header="{x:Static local:Localization.EdgeModName}"
+                                                Binding="{Binding Name}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{x:Static local:Localization.EdgeModVersion}"
+                                                Binding="{Binding Version}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{x:Static local:Localization.EdgeModAuthor}"
+                                                Binding="{Binding Author}" IsReadOnly="True" />
+                            <DataGridCheckBoxColumn Header="{x:Static local:Localization.EdgeModEnabled}"
+                                                    Binding="{Binding Enabled}" />
+                        </m:DataGridEx.Columns>
+                    </m:DataGridEx>
+                    <TextBox Name="DescriptionBlock" x:FieldModifier="private" Grid.Row="2" TextWrapping="Wrap"
+                             IsReadOnly="True" IsReadOnlyCaretVisible="True" VerticalScrollBarVisibility="Auto"
+                             Text="{x:Static local:Localization.ManageEdgeModsTabHint}" />
+                    <WrapPanel Grid.Row="4" HorizontalAlignment="Center" Orientation="Horizontal">
+                        <Button Margin="0,0,2,0" Content="{x:Static local:Localization.RefreshEdgeModsButton}"
+                                Click="RefreshEdgeMods" />
+                        <Button Margin="2,0" Content="{x:Static local:Localization.DeleteSelectedEdgeModButton}"
+                                Click="DeleteCurrentEdgeMod" />
+                        <Button Margin="2,0" Content="{x:Static local:Localization.DeleteAllDisabledEdgeModsButton}"
+                                Click="DeleteDisabledEdgeMods" />
+                        <Button Margin="2,0" Content="{x:Static local:Localization.ApplyChangesButton}"
+                                Click="InstallEdgeMods" />
+                        <Button Margin="2,0" Content="{x:Static local:Localization.ApplyChangesExecuteButton}"
+                                Click="InstallEdgeModsAndRun" />
+                        <Button Margin="2,0,0,0" Content="{x:Static local:Localization.CleanUpInstallButton}"
+                                Click="CleanUpInstall" />
+                    </WrapPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="{x:Static local:Localization.BrowseLevelsTab}"
+                     IsEnabled="{Binding IsEnabled, ElementName=RunGameButton}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition Height="5" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <DataGrid Name="LevelList" x:FieldModifier="private" AutoGenerateColumns="False" IsReadOnly="True"
+                              Sorting="OnSort" Initialized="OnGridInitialized" VirtualizingPanel.ScrollUnit="Pixel">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="#" Binding="{Binding Mapping}" />
+                            <DataGridTextColumn Header="{x:Static local:Localization.LevelName}"
+                                                Binding="{Binding Name}" />
+                            <DataGridTextColumn Header="ID" Binding="{Binding ID}"
+                                                ElementStyle="{StaticResource AlignRight}" />
+                            <DataGridTextColumn Binding="{Binding FilePath, Converter={StaticResource BinFilePath}}"
+                                                Header="{x:Static local:Localization.LevelPath}" />
+                            <DataGridTextColumn ElementStyle="{StaticResource AlignRight}"
+                                                Binding="{Binding SPlusTime, Converter={StaticResource Seconds}}">
+                                <DataGridTextColumn.Header>
+                                    <TextBlock>
+                                        S+
+                                        <Run Text="{x:Static local:Localization.LevelCriteria}" />
+                                    </TextBlock>
+                                </DataGridTextColumn.Header>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn ElementStyle="{StaticResource AlignRight}"
+                                                Binding="{Binding STime, Converter={StaticResource Seconds}}">
+                                <DataGridTextColumn.Header>
+                                    <TextBlock>
+                                        S
+                                        <Run Text="{x:Static local:Localization.LevelCriteria}" />
+                                    </TextBlock>
+                                </DataGridTextColumn.Header>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn ElementStyle="{StaticResource AlignRight}"
+                                                Binding="{Binding ATime, Converter={StaticResource Seconds}}">
+                                <DataGridTextColumn.Header>
+                                    <TextBlock>
+                                        A
+                                        <Run Text="{x:Static local:Localization.LevelCriteria}" />
+                                    </TextBlock>
+                                </DataGridTextColumn.Header>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn ElementStyle="{StaticResource AlignRight}"
+                                                Binding="{Binding BTime, Converter={StaticResource Seconds}}">
+                                <DataGridTextColumn.Header>
+                                    <TextBlock>
+                                        B
+                                        <Run Text="{x:Static local:Localization.LevelCriteria}" />
+                                    </TextBlock>
+                                </DataGridTextColumn.Header>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn ElementStyle="{StaticResource AlignRight}"
+                                                Binding="{Binding CTime, Converter={StaticResource Seconds}}">
+                                <DataGridTextColumn.Header>
+                                    <TextBlock>
+                                        C
+                                        <Run Text="{x:Static local:Localization.LevelCriteria}" />
+                                    </TextBlock>
+                                </DataGridTextColumn.Header>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{x:Static local:Localization.LevelMusicJava}"
+                                                Binding="{Binding MusicJavaName}" />
+                            <DataGridTextColumn Header="{x:Static local:Localization.LevelMusic}"
+                                                Binding="{Binding MusicName}" />
+                            <DataGridTextColumn Header="{x:Static local:Localization.LevelSize}"
+                                                Binding="{Binding Size}" />
+                            <DataGridTextColumn Header="{x:Static local:Localization.LevelSpawnPoint}"
+                                                Binding="{Binding SpawnPoint}" />
+                            <DataGridTextColumn Header="{x:Static local:Localization.LevelExitPoint}"
+                                                Binding="{Binding ExitPoint}" />
+                        </DataGrid.Columns>
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="{x:Static local:Localization.ShowMinimapItem}"
+                                          Click="ShowMinimap" />
+                                <MenuItem Header="{x:Static local:Localization.DrawModelTreeItem}"
+                                          Click="DrawLevelModelTree" />
+                                <MenuItem Header="{x:Static local:Localization.BrowseLevelInExplorerItem}"
+                                          Click="ShowLevelInExplorer" />
+                                <MenuItem Header="{x:Static local:Localization.DecompileLevelItem}"
+                                          Click="Decompile" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                    </DataGrid>
+                    <TextBlock Grid.Row="2" TextWrapping="Wrap">
+                        <Run Text="{x:Static local:Localization.BrowseLevelsTabHint}" />
+                        <Hyperlink Click="ModifyMappingXml">
+                            <Run Text="{x:Static local:Localization.ModifyMappingXmlLink}" />
+                        </Hyperlink>
+                        <Hyperlink Click="ShowMappingXmlHelp">
+                            <Run Text="{x:Static local:Localization.ShowMappingXmlHelpLink}" />
+                        </Hyperlink>
+                    </TextBlock>
+                </Grid>
+            </TabItem>
+            <TabItem Header="{x:Static local:Localization.CompileTab}" Name="CompileTab" x:FieldModifier="private"
+                     AllowDrop="True" PreviewDrop="OnBinaryDrop" PreviewDragEnter="OnBinaryDragEnter"
+                     PreviewDragOver="OnDragOver" PreviewDragLeave="OnDragLeave">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="5" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="5" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Margin="5,0" TextWrapping="Wrap">
+                        <Run Text="{x:Static local:Localization.CompileTabHint}" />
+                        <Hyperlink Click="ShowCommandLineHelp">
+                            <Run Text="{x:Static local:Localization.CompileTabHintShowCommandLineHelpLink}" />
+                        </Hyperlink>
+                    </TextBlock>
+                    <Grid Row="2" Margin="5,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{x:Static local:Localization.StartAfterCompileLabel}"
+                                   VerticalAlignment="Top" />
+                        <WrapPanel Name="CheckBoxPanel" x:FieldModifier="private" Grid.Column="1">
+                            <WrapPanel.Resources>
+                                <Style TargetType="CheckBox">
+                                    <Setter Property="Margin" Value="5,0,0,0" />
+                                    <EventSetter Event="MouseRightButtonUp" Handler="OpenReference" />
+                                </Style>
+                            </WrapPanel.Resources>
+                            <CheckBox Content="text.loc" Tag="text-loc" />
+                            <CheckBox Content="text.xls" Tag="text-loc" />
+                            <CheckBox Content="cos.bin" Tag="cos-bin" />
+                            <CheckBox Content="cos.txt" Tag="cos-bin" />
+                            <CheckBox Content="font.bin" Tag="font-bin" />
+                            <CheckBox Content="font.xml" Tag="font-bin" />
+                            <CheckBox Content="level.bin" Tag="level-bin" />
+                            <CheckBox Content="level.png" Tag="level-bin" />
+                            <CheckBox Content="level.z.png" Tag="level-bin" />
+                            <CheckBox Content="level.xml" Tag="level-bin" />
+                            <CheckBox Content="animation.ean" Tag="asset/ean" />
+                            <CheckBox Content="animation.xml" Tag="asset/ean" />
+                            <CheckBox Content="material.ema" Tag="asset/ema" />
+                            <CheckBox Content="material.xml" Tag="asset/ema" />
+                            <CheckBox Content="model.eso" Tag="asset/eso" />
+                            <CheckBox Content="model.xml" Tag="asset/eso" />
+                            <CheckBox Content="texture.etx" Tag="asset/etx" />
+                            <CheckBox Content="texture.png" Tag="asset/etx" />
+                            <CheckBox Content="audio" Tag="audio" />
+                            <CheckBox Content="sfx" Tag="audio" />
+                        </WrapPanel>
+                    </Grid>
+                    <Grid Row="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition Height="5" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="5" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <ListBox Name="DecompileHistoryBox" x:FieldModifier="private" SelectionMode="Extended">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                    <EventSetter Event="MouseDoubleClick" Handler="DecompileHistory" />
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource Files}}" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <Button Grid.Row="2" Content="{x:Static local:Localization.CompileButton}"
+                                Click="DecompileHistory">
+                            <Button.Style>
+                                <Style>
+                                    <Style.Triggers>
+                                        <DataTrigger Value="-1" Binding="{Binding SelectedIndex,
+                                                                                  ElementName=DecompileHistoryBox}">
+                                            <Setter Property="Button.IsEnabled" Value="False" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button Grid.Row="4" Content="{x:Static local:Localization.ClearHistoryButton}"
+                                Click="ClearHistory">
+                            <Button.Style>
+                                <Style>
+                                    <Style.Triggers>
+                                        <DataTrigger Value="0" Binding="{Binding Items.Count,
+                                                                                 ElementName=DecompileHistoryBox}">
+                                            <Setter Property="Button.IsEnabled" Value="False" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <GridSplitter Width="5" Grid.RowSpan="5" Grid.Column="1" HorizontalAlignment="Center" />
+                        <TextBox Name="WarningBox" x:FieldModifier="private" IsReadOnly="True"
+                                 IsReadOnlyCaretVisible="True" Grid.RowSpan="5" Grid.Column="2" TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto" />
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="{x:Static local:Localization.DrawModelTree}" AllowDrop="True"
+                     Name="DrawModelTreeTab" x:FieldModifier="private" PreviewDragEnter="OnModelDragEnter"
+                     PreviewDragOver="OnDragOver" PreviewDragLeave="OnDragLeave" PreviewDrop="OnModelDrop"
+                     IsEnabled="{Binding IsEnabled, ElementName=RunGameButton}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Label Content="{x:Static local:Localization.EnterModelNameLabel}"
+                           Target="{Binding ElementName=ModelNameBox}" />
+                    <ComboBox Name="ModelNameBox" x:FieldModifier="private" Grid.Column="1" VerticalAlignment="Center"
+                              IsEditable="True" />
+                    <WrapPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="{x:Static local:Localization.DrawButton}" Click="DrawModelTree" Margin="2"
+                                IsDefault="True" />
+                        <Button Content="{x:Static local:Localization.ViewerAddSelectedModelButton}" Margin="2"
+                                Click="ViewModel" />
+                        <Button Content="{x:Static local:Localization.BrowseFileInExplorerButton}" Margin="2"
+                                Click="ShowFileInExplorer" />
+                        <Button Content="{x:Static local:Localization.Help}" Click="GetModelTreeHelp" Margin="2" />
+                    </WrapPanel>
+                    <WrapPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <CheckBox Name="DrawChildModelsBox" x:FieldModifier="private" Margin="2"
+                                  Content="{x:Static local:Localization.DrawChildModelsBox}"
+                                  ToolTip="{x:Static local:Localization.DrawChildModelsBoxHint}" />
+                        <CheckBox Name="EnableDebugModeBox" x:FieldModifier="private" Margin="2"
+                                  Content="{x:Static local:Localization.EnableDebugModeBox}"
+                                  ToolTip="{x:Static local:Localization.EnableDebugModeBoxHint}" />
+                    </WrapPanel>
+                    <TreeView Name="ModelTreeView" x:FieldModifier="private" Grid.Row="3" Grid.ColumnSpan="2" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="{x:Static local:Localization.DrawAnimTree}"
+                     IsEnabled="{Binding IsEnabled, ElementName=RunGameButton}"
+                     PreviewDragEnter="OnAnimationDragEnter" PreviewDragOver="OnDragOver"
+                     PreviewDragLeave="OnDragLeave" PreviewDrop="OnAnimationDrop" AllowDrop="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Label Content="{x:Static local:Localization.EnterAnimNameLabel}"
+                           Target="{Binding ElementName=AnimationNameBox}" />
+                    <ComboBox Name="AnimationNameBox" x:FieldModifier="private" Grid.Column="1"
+                              VerticalAlignment="Center" IsEditable="True" />
+                    <WrapPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="{x:Static local:Localization.DrawButton}" Click="DrawAnimationTree" Margin="2"
+                                IsDefault="True" />
+                        <Button Content="{x:Static local:Localization.ViewerApplySelectedAnimButton}" Margin="2"
+                                Click="ViewAnimation" MouseRightButtonUp="ViewAnimationNonLoop" />
+                        <Button Content="{x:Static local:Localization.BrowseFileInExplorerButton}" Margin="2"
+                                Click="ShowFileInExplorer" />
+                        <Button Content="{x:Static local:Localization.Help}" Click="GetAnimationTreeHelp" Margin="2" />
+                    </WrapPanel>
+                    <TreeView Name="AnimationTreeView" x:FieldModifier="private" Grid.Row="2" Grid.ColumnSpan="2" />
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</m:GlassWindow>

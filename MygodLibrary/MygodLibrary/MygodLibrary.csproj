@@ -1,0 +1,250 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D915CED8-AC3F-40D6-8C95-4D176C924A61}</ProjectGuid>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Mygod</RootNamespace>
+    <AssemblyName>MygodLibrary</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <DocumentationFile>bin\Release\MygodLibrary.XML</DocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Release\MygodLibrary.XML</DocumentationFile>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="UIAutomationProvider" />
+    <Reference Include="UIAutomationTypes" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Collections\ObjectModel\AdvancedObservableKeyedCollection.cs" />
+    <Compile Include="Collections\ObjectModel\ObservableKeyedCollection.cs" />
+    <Compile Include="Helper.cs" />
+    <Compile Include="IO\IniFile.cs" />
+    <Compile Include="Net\LinkConverter.cs" />
+    <Compile Include="Net\NetworkInformation\NetworkTester.cs" />
+    <Compile Include="Net\WebsiteManager.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Runtime\Serialization\Json\JsonSerialization.cs" />
+    <Compile Include="Runtime\Serialization\Plist\BinaryPlistArray.cs" />
+    <Compile Include="Runtime\Serialization\Plist\BinaryPlistDictionary.cs" />
+    <Compile Include="Runtime\Serialization\Plist\BinaryPlistItem.cs" />
+    <Compile Include="Runtime\Serialization\Plist\BinaryPlistReader.cs" />
+    <Compile Include="Runtime\Serialization\Plist\BinaryPlistWriter.cs" />
+    <Compile Include="Runtime\Serialization\Plist\DataContractBinaryPlistSerializer.cs" />
+    <Compile Include="Runtime\Serialization\Plist\EndianConverter.cs" />
+    <Compile Include="Runtime\Serialization\Plist\Extensions.cs" />
+    <Compile Include="Runtime\Serialization\Plist\IPlistSerializable.cs" />
+    <Compile Include="Runtime\Serialization\Plist\TypeCacheItem.cs" />
+    <Compile Include="Runtime\Serialization\Plist\UniqueValueCache.cs" />
+    <Compile Include="Security\Cryptography\MD5Helper.cs" />
+    <Compile Include="Text\Kmp.cs" />
+    <Compile Include="Windows\Automation\Peers\AutoCompleteBoxAutomationPeer.cs" />
+    <Compile Include="Windows\ColorUtilities.cs" />
+    <Compile Include="Windows\Controls\AlignableWrapPanel.cs" />
+    <Compile Include="Windows\Controls\AnimatedExpander.cs" />
+    <Compile Include="Windows\Controls\AnimatedProgressBar.cs" />
+    <Compile Include="Windows\Controls\DataGridAutoCompleteColumn.cs" />
+    <Compile Include="Windows\Controls\DataGridEx.cs" />
+    <Compile Include="Windows\Controls\DragCanvas.cs" />
+    <Compile Include="Windows\Controls\Primitives\ButtonChrome.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[Extended]\[ColorCanvas]\ColorCanvas.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[Extended]\[ColorCanvas]\ColorSpectrumSlider.cs" />
+    <Compile Include="Windows\CurrentApp.Windows.cs" />
+    <Compile Include="Windows\HsvColor.cs" />
+    <Compile Include="Windows\Controls\Primitives\InputBase.cs" />
+    <Compile Include="Windows\Controls\Primitives\UpDownBase.cs" />
+    <Compile Include="Windows\Controls\Reflection.cs" />
+    <Compile Include="Windows\Controls\Themes\ResourceKeys.cs" />
+    <Compile Include="Windows\Controls\Themes\StaticResourceKey.cs" />
+    <Compile Include="Windows\Controls\WorldOfGooCursor.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[Extended]\[ButtonSpinner]\ButtonSpinner.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[Extended]\[ButtonSpinner]\SpinDirection.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[Extended]\[ButtonSpinner]\SpinEventArgs.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[Extended]\[ButtonSpinner]\Spinner.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[Extended]\[ButtonSpinner]\ValidSpinDirections.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[Extended]\[ColorPicker]\ColorItem.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[Extended]\[ColorPicker]\ColorPicker.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[Extended]\[UpDown]\DecimalUpDown.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[Extended]\[UpDown]\DoubleUpDown.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[Extended]\[UpDown]\IntegerUpDown.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[Extended]\[UpDown]\NumericUpDown.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[Extended]\WatermarkTextBox.cs" />
+    <Compile Include="Windows\Converters.cs" />
+    <Compile Include="Windows\CursorWindow.cs" />
+    <Compile Include="Windows\Dialogs\SafeHandles.cs" />
+    <Compile Include="Windows\Dialogs\NativeMethods.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\BindingEvaluator.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\InteractionHelper.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\IUpdateVisualState.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\VisualStates.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\WeakEventListener.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[AutoCompleteBox]\AutoCompleteBox.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[AutoCompleteBox]\AutoCompleteFilter.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[AutoCompleteBox]\AutoCompleteFilterMode.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[AutoCompleteBox]\AutoCompleteFilterPredicate.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[AutoCompleteBox]\ISelectionAdapter.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[AutoCompleteBox]\PopulatedEventArgs.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[AutoCompleteBox]\PopulatedEventHandler.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[AutoCompleteBox]\PopulatingEventArgs.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[AutoCompleteBox]\PopulatingEventHandler.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[AutoCompleteBox]\PopupHelper.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[AutoCompleteBox]\RoutedPropertyChangingEventArgs.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[AutoCompleteBox]\RoutedPropertyChangingEventHandler.cs" />
+    <Compile Include="Windows\Controls\[WPFToolkit]\[AutoCompleteBox]\SelectorSelectionAdapter.cs" />
+    <Compile Include="Windows\Controls\[ZoomAndPan]\AnimationHelper.cs" />
+    <Compile Include="Windows\Controls\[ZoomAndPan]\ZoomAndPanControl.cs" />
+    <Compile Include="Windows\Controls\[ZoomAndPan]\ZoomAndPanControl_IScrollInfo.cs" />
+    <Compile Include="Windows\CurrentApp.cs" />
+    <Compile Include="Windows\Dialogs\[CredentialDialog]\CredentialDialog.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Windows\Dialogs\[CredentialDialog]\CredentialDialog.designer.cs">
+      <DependentUpon>CredentialDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\Dialogs\[CredentialDialog]\CredentialException.cs" />
+    <Compile Include="Windows\Input\SystemCursor.cs" />
+    <Compile Include="Windows\StartupManager.cs" />
+    <Compile Include="Windows\TreeHelper.cs" />
+    <Compile Include="Windows\Input\UserActivityHook.cs" />
+    <Compile Include="Windows\[DragDrop]\DataObject.cs" />
+    <Compile Include="Runtime\InteropServices\ComTypes\DataObjectExtensions.cs" />
+    <Compile Include="Windows\[DragDrop]\DragDropHelper.cs" />
+    <Compile Include="Windows\[DragDrop]\IDragSourceHelper.cs" />
+    <Compile Include="Windows\[DragDrop]\IDropTargetHelper.cs" />
+    <Compile Include="Windows\[DragDrop]\NativeStructures.cs" />
+    <Compile Include="Windows\[DragDrop]\WpfDataObjectExtensions.cs" />
+    <Compile Include="Windows\[DragDrop]\DragDropExtensions.cs" />
+    <Compile Include="Windows\[DragDrop]\WpfDragSourceHelper.cs" />
+    <Compile Include="Windows\[DragDrop]\WpfDropTargetHelper.cs" />
+    <Compile Include="Windows\[DragDrop]\WpfDropTargetHelperExtensions.cs" />
+    <Compile Include="Windows\GlassWindow.cs" />
+    <Compile Include="Xml\Linq\XHelper.cs" />
+    <Compile Include="Xml\Serialization\XmlSerialization.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Themes\Generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\Common.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\cmdarr1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\cmdarr2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\exparr-down1.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\exparr-down2.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\exparr-down3.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\exparr-up1.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\exparr-up2.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\exparr-up3.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\shield-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\shield-32.png" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
