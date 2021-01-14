@@ -223,7 +223,7 @@ namespace Mygod.Edge.Tool
                 searcher.Start();
                 User current = null;
                 if (Edge.SteamOtl != null)
-                    current = Users.Current.FirstOrDefault(user => user.Name == Edge.SteamOtl.SettingsUserName);
+                    current = Users.Current.FirstOrDefault(user => user.SteamID == Edge.SteamOtl.SettingsUserName);
                 else if (Users.Current.CurrentUser == null) current = Users.Current.FirstOrDefault();
                 if (current != null) Users.Current.CurrentUser = current;
                 AchievementsList.Items.Refresh();
@@ -659,8 +659,7 @@ namespace Mygod.Edge.Tool
 
         private void ShowMappingXmlHelp(object sender, RoutedEventArgs e)
         {
-            Process.Start
-                ("https://edgefans.mygod.be/edgefans.tk/developers/file-formats/mapping-xml.html");
+            Process.Start("https://edgefans.mygod.be/edgefans.tk/developers/file-formats/mapping-xml.html");
         }
 
         #endregion
@@ -674,7 +673,7 @@ namespace Mygod.Edge.Tool
 
         private void SetDefaultProfile(object sender, RoutedEventArgs e)
         {
-            if (Edge.SteamOtl != null) Edge.SteamOtl.SettingsUserName = Users.Current.CurrentUser.Name;
+            if (Edge.SteamOtl != null) Edge.SteamOtl.SettingsUserName = Users.Current.CurrentUser.SteamID;
         }
 
         private void ForceUnlockAchievement(object sender, MouseButtonEventArgs e)
@@ -1190,8 +1189,15 @@ namespace Mygod.Edge.Tool
         {
             var achievement = value as Achievement;
             if (achievement == null || Users.Current.CurrentUser == null)
+            {
                 return Application.Current.Resources["Disabled"];
-            if (Users.Current.CurrentUser.GetAchieved(achievement)) return Application.Current.Resources["Achieved"];
+            }
+
+            if (Users.Current.CurrentUser.GetAchieved(achievement))
+            {
+                return Application.Current.Resources["Achieved"];
+            }
+
             var result = (Image)Application.Current.Resources["Help"];
             result.Tag = achievement.Help;
             return result;

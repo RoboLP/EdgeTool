@@ -169,8 +169,7 @@ namespace Mygod.Edge.Tool
 
     public sealed class Users : ObservableKeyedCollection<string, User>
     {
-        public static readonly string Root =
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "OUTLAWS");
+        public static readonly string Root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Steam/userdata");
         public static readonly Users Current = new Users();
 
         private Users()
@@ -180,7 +179,7 @@ namespace Mygod.Edge.Tool
 
         protected override string GetKeyForItem(User item)
         {
-            return item.Name;
+            return item.SteamID;
         }
 
         public static string GetStatsDirectory(string name)
@@ -192,10 +191,34 @@ namespace Mygod.Edge.Tool
         {
             HashSet<string> users = Directory.Exists(Root)
                 ? new HashSet<string>(from info in new DirectoryInfo(Root).EnumerateDirectories() select info.Name)
-                : new HashSet<string>(), removing = new HashSet<string>(from user in this select user.Name);
-            foreach (var user in users) removing.Remove(user);
-            foreach (var user in removing) Remove(user);
-            foreach (var user in users) if (Contains(user)) base[user].Refresh(); else Add(new User(user));
+                : new HashSet<string>();
+            HashSet<string> removing = new HashSet<string>(from user in this select user.SteamID);
+
+            foreach (var user in users)
+            {
+                removing.Remove(user);
+            }
+
+            foreach (var user in removing)
+            {
+                Remove(user);
+            }
+
+            foreach (var user in users)
+            {
+                if (Contains(user))
+                {
+                    base[user].Refresh();
+                }
+                else
+                {
+                    XElement userName = XDocument.Parse(new WebClient().DownloadString("https://steamcommunity.com/profiles/[U:1:" + user + "]/?xml=1")).Root.Element("steamID");
+                    if (userName != null)
+                    {
+                        Add(new User(user, userName.Value));
+                    }
+                }
+            }
         }
 
         private User currentUser;
@@ -211,19 +234,23 @@ namespace Mygod.Edge.Tool
         private const string AchievementsIniFileName = "achievements.ini";
         private AchievementSections sections;
 
-        internal User(string name)
+        internal User(string id, string name)
         {
-            achievementsFile = new IniFile(Path.Combine(Users.GetStatsDirectory(Name = name),
-#pragma warning restore 612
-                                                        AchievementsIniFileName));
+            SteamID = id;
+            UserName = name;
+            achievementsFile = new IniFile(Path.Combine(Users.GetStatsDirectory(id), AchievementsIniFileName));
             Refresh();
         }
         
         public void Refresh()
         {
             sections = new AchievementSections();
-            foreach (var section in from a in Achievements.Current
-                                    select new AchievementSection(achievementsFile, a.ApiName)) sections.Add(section);
+            foreach (var a in Achievements.Current)
+            {
+                var section = new AchievementSection(achievementsFile, a.ApiName);
+                sections.Add(section);
+            }
+
             var source = (from section in sections where section.Achieved select section).ToArray();
             AchievedAchievementsCount = source.Count(section => section.Achieved);
             Points = sections.Sum(section => Achievements.Current[section.Name].Points);
@@ -241,7 +268,8 @@ namespace Mygod.Edge.Tool
 
         public int AchievedAchievementsCount { get; private set; }
         public int AchievedPoints { get; private set; }
-        public string Name { get; }
+        public string SteamID { get; }
+        public string UserName { get; private set; }
         public int Points { get; private set; }
     }
 }

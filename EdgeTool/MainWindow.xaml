@@ -113,12 +113,11 @@
                         <ComboBox.ItemTemplate>
                             <DataTemplate DataType="{x:Type local:User}">
                                 <TextBlock>
-                                    <Run Text="{Binding Name, Mode=OneWay}" />
-                                    (<Run Text="{Binding AchievedAchievementsCount, Mode=OneWay}" />/<Run
-                                          Text="{x:Static local:Achievements.CountString}" />,
-                                    <Run Text="{Binding AchievedPoints, Mode=OneWay}" />/<Run
-                                         Text="{Binding Points, Mode=OneWay}" />
-                                    <Run Text="{x:Static local:Localization.Points}" />)
+                                    <Run Text="{Binding UserName, Mode=OneWay}"/> 
+                                    (<Run Text="{Binding SteamID, Mode=OneWay}" />):
+                                    <Run Text="{Binding AchievedAchievementsCount, Mode=OneWay}" />/<Run Text="{x:Static local:Achievements.CountString}" />,
+                                    <Run Text="{Binding AchievedPoints, Mode=OneWay}" />/<Run Text="{Binding Points, Mode=OneWay}" />
+                                    <Run Text="{x:Static local:Localization.Points}" />
                                 </TextBlock>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
@@ -188,7 +187,7 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <TextBlock Name="AchievementsTip" x:FieldModifier="private" Grid.Row="3" Grid.ColumnSpan="4"
+                    <TextBlock Name="AchievementsTip" x:FieldModifier="private" Grid.Row="3" Grid.ColumnSpan="8"
                                Visibility="Collapsed" Margin="0,5,0,0"
                                Text="{x:Static local:Localization.BrowseAchievementsTabHint}" />
                 </Grid>
