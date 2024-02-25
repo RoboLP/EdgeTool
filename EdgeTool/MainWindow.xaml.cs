@@ -612,6 +612,11 @@ namespace Mygod.Edge.Tool
             foreach (var level in LevelList.SelectedItems.OfType<Level>()) new MinimapWindow(level).Show();
         }
 
+        private void SaveAsImage(object sender, RoutedEventArgs e)
+        {
+            foreach (var level in LevelList.SelectedItems.OfType<Level>()) new MinimapWindow(level).Save(sender, e);
+        }
+
         private void Decompile(object sender, RoutedEventArgs e)
         {
             if (outputSelector.ShowDialog(this) != CommonFileDialogResult.Ok) return;
@@ -650,6 +655,19 @@ namespace Mygod.Edge.Tool
             ModelNameBox.Text = Path.GetFileNameWithoutExtension(level.FilePath);
             Tabs.SelectedItem = DrawModelTreeTab;
             DrawModelTree(sender, e);
+        }
+
+        private void ViewInModelViewer(object sender, RoutedEventArgs e)
+        {
+            var level = LevelList.SelectedItem as Level;
+            if (level == null) return;
+            ModelNameBox.Text = Path.GetFileNameWithoutExtension(level.FilePath);
+            DrawModelTree(sender, e);
+            if(ModelWindow != null)
+            {
+                ModelWindow.Clear(sender, e);
+            }
+            ViewModel(sender, e);
         }
 
         private void ModifyMappingXml(object sender, RoutedEventArgs e)
@@ -1041,6 +1059,15 @@ namespace Mygod.Edge.Tool
             item.Header = $"{fileName}.etx ({etx.AssetHeader.Name}.png)";
         }
 
+        private void ReloadModelViewer(object sender, SelectionChangedEventArgs e)
+        {
+            if (ModelWindow == null)
+            {
+                return;
+            }
+            ViewInModelViewer(sender, e);
+        }
+
         private void GetModelTreeHelp(object sender, RoutedEventArgs e)
         {
             Process.Start("https://edgefans.mygod.be/edgefans.tk/developers/file-formats/asset/" +
@@ -1130,10 +1157,22 @@ namespace Mygod.Edge.Tool
         private void ViewModel(object sender, RoutedEventArgs e)
         {
             var item = ModelTreeView.SelectedItem as TreeViewItem;
-            if (item == null) return;
+            if (item == null)
+            {
+                item = ModelTreeView.Items.GetItemAt(0) as TreeViewItem;
+            }
+
             var path = item.Tag.ToString();
             if (!path.EndsWith(".eso", false, CultureInfo.InvariantCulture)) return;
-            if (ModelWindow == null) (ModelWindow = new ModelWindow()).Show();
+            if (ModelWindow == null)
+            {
+                (ModelWindow = new ModelWindow(ModelNameBox.Text)).Show();
+            }
+            else
+            {
+                ModelWindow.SetModelName(ModelNameBox.Text);
+            }
+
             ModelWindow.DrawChildModels = DrawChildModelsBox.IsChecked == true;
             ModelWindow.DebugMode = EnableDebugModeBox.IsChecked == true;
             ModelWindow.Draw(path);

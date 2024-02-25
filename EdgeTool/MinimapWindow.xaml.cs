@@ -75,13 +75,23 @@ namespace Mygod.Edge.Tool
             Filters = { new CommonFileDialogFilter(Localization.PngFilter, "*.png") }
         };
 
-        private void Save(object sender, RoutedEventArgs e)
+        public void Save(object sender, RoutedEventArgs e)
         {
-            fileSaver.DefaultFileName = Path.GetFileNameWithoutExtension(level.FilePath) + ".png";
-            if (fileSaver.ShowDialog() != CommonFileDialogResult.Cancel) return;
+            string name;
+            if(sender.GetType() == typeof(System.Windows.Controls.MenuItem))
+            {
+                name = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", Path.GetFileNameWithoutExtension(level.FilePath) + ".png");
+            }
+            else
+            {
+                fileSaver.DefaultFileName = Path.GetFileNameWithoutExtension(level.FilePath) + ".png";
+                if (fileSaver.ShowDialog() == CommonFileDialogResult.Cancel) return;
+                name = fileSaver.FileName;
+            }
+
             var encoder = new PngBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create((BitmapSource)Picture.Source));
-            using (var stream = new FileStream(fileSaver.FileName, FileMode.Create, FileAccess.Write, FileShare.Read))
+            using (var stream = new FileStream(name, FileMode.Create, FileAccess.Write, FileShare.Read))
                 encoder.Save(stream);
         }
 

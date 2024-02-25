@@ -169,7 +169,7 @@ namespace Mygod.Edge.Tool
 
     public sealed class Users : ObservableKeyedCollection<string, User>
     {
-        public static readonly string Root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Steam/userdata");
+        public static readonly string Root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Steam", "userdata");
         public static readonly Users Current = new Users();
 
         private Users()
@@ -179,7 +179,7 @@ namespace Mygod.Edge.Tool
 
         protected override string GetKeyForItem(User item)
         {
-            return item.SteamID;
+            return item.Name;
         }
 
         public static string GetStatsDirectory(string name)
@@ -192,7 +192,7 @@ namespace Mygod.Edge.Tool
             HashSet<string> users = Directory.Exists(Root)
                 ? new HashSet<string>(from info in new DirectoryInfo(Root).EnumerateDirectories() select info.Name)
                 : new HashSet<string>();
-            HashSet<string> removing = new HashSet<string>(from user in this select user.SteamID);
+            HashSet<string> removing = new HashSet<string>(from user in this select user.Name);
 
             foreach (var user in users)
             {
@@ -208,15 +208,11 @@ namespace Mygod.Edge.Tool
             {
                 if (Contains(user))
                 {
-                    base[user].Refresh();
+                    base[user].Refresh(); 
                 }
                 else
                 {
-                    XElement userName = XDocument.Parse(new WebClient().DownloadString("https://steamcommunity.com/profiles/[U:1:" + user + "]/?xml=1")).Root.Element("steamID");
-                    if (userName != null)
-                    {
-                        Add(new User(user, userName.Value));
-                    }
+                    Add(new User(user));
                 }
             }
         }
@@ -234,11 +230,11 @@ namespace Mygod.Edge.Tool
         private const string AchievementsIniFileName = "achievements.ini";
         private AchievementSections sections;
 
-        internal User(string id, string name)
+        internal User(string name)
         {
-            SteamID = id;
-            UserName = name;
-            achievementsFile = new IniFile(Path.Combine(Users.GetStatsDirectory(id), AchievementsIniFileName));
+            achievementsFile = new IniFile(Path.Combine(Users.GetStatsDirectory(Name = name),
+#pragma warning restore 612
+                                                        AchievementsIniFileName));
             Refresh();
         }
         
@@ -255,23 +251,6 @@ namespace Mygod.Edge.Tool
             AchievedAchievementsCount = source.Count(section => section.Achieved);
             Points = sections.Sum(section => Achievements.Current[section.Name].Points);
             AchievedPoints = source.Sum(section => Achievements.Current[section.Name].Points);
-
-            try
-            {
-                XElement achievements = XDocument.Parse(new WebClient().DownloadString("https://steamcommunity.com/profiles/[U:1:" + SteamID + "]/stats/EDGE/?xml=1")).Root.Element("achievements");
-                if (achievements != null)
-                {
-                    foreach (XElement achievement in achievements.Elements("achievement"))
-                    {
-                        Console.WriteLine(achievement.Element("apiname").Value + " " + achievement.Attribute("closed").Value);
-                    }
-                }
-
-            }
-            catch
-            {
-                Console.WriteLine("adf");
-            }
         }
 
         public bool GetAchieved(Achievement achievement)
@@ -285,8 +264,7 @@ namespace Mygod.Edge.Tool
 
         public int AchievedAchievementsCount { get; private set; }
         public int AchievedPoints { get; private set; }
-        public string SteamID { get; }
-        public string UserName { get; private set; }
+        public string Name { get; }
         public int Points { get; private set; }
     }
 }

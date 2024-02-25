@@ -19,11 +19,19 @@ namespace Mygod.Edge.Tool
 {
     public sealed partial class ModelWindow
     {
-        public ModelWindow()
+        private string ModelName;
+
+        public void SetModelName(string modelName)
         {
+            this.ModelName = modelName;
+        }
+
+        public ModelWindow(string modelName)
+        {
+            ModelName = modelName;
             InitializeComponent();
         }
-        
+
         public bool DrawChildModels, DebugMode;
 
         public void Draw(string path, Matrix3D? parentMatrix = null)
@@ -190,6 +198,25 @@ namespace Mygod.Edge.Tool
         private void Zoom(object sender, MouseWheelEventArgs e)
         {
             Camera.FieldOfView -= (double) e.Delta / Mouse.MouseWheelDeltaForOneLine;
+        }
+
+        private void SaveAsImage(object sender, RoutedEventArgs e)
+        {
+            RenderTargetBitmap bmp = new RenderTargetBitmap((int) View.ActualWidth, (int) View.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+            bmp.Render(View);
+            BitmapFrame frame = BitmapFrame.Create(bmp);
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(frame);
+
+            using (var stream = File.Create(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", this.ModelName + ".png")))
+            {
+                encoder.Save(stream);
+            }
+        }
+
+        public void Clear(object sender, RoutedEventArgs e)
+        {
+            Model.Children.Clear();
         }
 
         private void ModelWindowClosed(object sender, EventArgs e)

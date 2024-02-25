@@ -245,7 +245,7 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <DataGrid Name="LevelList" x:FieldModifier="private" AutoGenerateColumns="False" IsReadOnly="True"
-                              Sorting="OnSort" Initialized="OnGridInitialized" VirtualizingPanel.ScrollUnit="Pixel">
+                              Sorting="OnSort" Initialized="OnGridInitialized" VirtualizingPanel.ScrollUnit="Pixel" SelectionChanged="ReloadModelViewer">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="#" Binding="{Binding Mapping}" />
                             <DataGridTextColumn Header="{x:Static local:Localization.LevelName}"
@@ -314,8 +314,10 @@
                             <ContextMenu>
                                 <MenuItem Header="{x:Static local:Localization.ShowMinimapItem}"
                                           Click="ShowMinimap" />
+                                <MenuItem Header="Save minimap as image" Click="SaveAsImage"/>
                                 <MenuItem Header="{x:Static local:Localization.DrawModelTreeItem}"
                                           Click="DrawLevelModelTree" />
+                                <MenuItem Header="View in model viewer" Click="ViewInModelViewer"/>
                                 <MenuItem Header="{x:Static local:Localization.BrowseLevelInExplorerItem}"
                                           Click="ShowLevelInExplorer" />
                                 <MenuItem Header="{x:Static local:Localization.DecompileLevelItem}"
@@ -476,7 +478,7 @@
                     <WrapPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
                         <CheckBox Name="DrawChildModelsBox" x:FieldModifier="private" Margin="2"
                                   Content="{x:Static local:Localization.DrawChildModelsBox}"
-                                  ToolTip="{x:Static local:Localization.DrawChildModelsBoxHint}" />
+                                  ToolTip="{x:Static local:Localization.DrawChildModelsBoxHint}" IsChecked="True"/>
                         <CheckBox Name="EnableDebugModeBox" x:FieldModifier="private" Margin="2"
                                   Content="{x:Static local:Localization.EnableDebugModeBox}"
                                   ToolTip="{x:Static local:Localization.EnableDebugModeBoxHint}" />

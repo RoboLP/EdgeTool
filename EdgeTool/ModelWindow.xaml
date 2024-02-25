@@ -14,13 +14,14 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
-            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="100" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Grid Name="Grid" x:FieldModifier="private" MouseWheel="Zoom" MouseDown="StartDragging" MouseMove="Dragging"
-              MouseUp="StopDragging" Grid.ColumnSpan="3" Background="{Binding SelectedColor, ElementName=Picker,
+              MouseUp="StopDragging" Grid.ColumnSpan="4" Background="{Binding SelectedColor, ElementName=Picker,
                                                                 Converter={StaticResource SolidColorBrushConverter}}">
-            <Viewport3D ClipToBounds="True" IsHitTestVisible="False">
+            <Viewport3D Name="View" ClipToBounds="True" IsHitTestVisible="False">
                 <Viewport3D.Camera>
                     <PerspectiveCamera x:Name="Camera" x:FieldModifier="private"
                                        LookDirection="-1,-1,-1" Position="50,50,50" FieldOfView="60" />
@@ -35,8 +36,10 @@
                 </ModelVisual3D>
             </Viewport3D>
         </Grid>
-        <TextBlock Text="{x:Static local:Localization.ModelViewerHint}" Grid.Row="1" VerticalAlignment="Center"
+        <TextBlock Text="{x:Static local:Localization.ModelViewerHint}" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"
                    Effect="{DynamicResource GlowingEffect}" TextWrapping="Wrap" />
-        <m:ColorPicker Grid.Row="1" Grid.Column="2" Name="Picker" SelectedColor="Black" />
+        <Button Grid.Row="1" Grid.Column="1" Content="Save as image" Click="SaveAsImage"/>
+        <Button Grid.Row="1" Grid.Column="2" Content="Clear" Click="Clear"/>
+        <m:ColorPicker Grid.Row="1" Grid.Column="3" Name="Picker" SelectedColor="Black" />
     </Grid>
 </m:GlassWindow>
