@@ -50,6 +50,7 @@ namespace Mygod.Edge.Tool
                         Positions = new Point3DCollection(model.Vertices.Select(AssetHelper.ConvertVertex)),
                         Normals = new Vector3DCollection(model.Normals.Select(AssetHelper.ConvertVector))
                     };
+
                     var ema = EMA.FromFile(Path.Combine(MainWindow.Edge.ModelsDirectory,
                                                         model.MaterialAsset + ".ema"));
                     if (ema.Textures.Length > 0 && model.HasTexCoords)
@@ -87,6 +88,98 @@ namespace Mygod.Edge.Tool
                 if (!DrawChildModels) return;
                 if (!eso.Header.NodeChild.IsZero())
                     Draw(Path.Combine(Path.GetDirectoryName(path), eso.Header.NodeChild + ".eso"), matrix);
+                path = Path.Combine(Path.GetDirectoryName(path), eso.Header.NodeSibling + ".eso");
+            }
+            while (!eso.Header.NodeSibling.IsZero());
+        }
+
+        public void DrawElement(string name, Point3D16 pos, Matrix3D? parentMatrix = null)
+        {
+            string path = Path.Combine(MainWindow.Edge.ModelsDirectory, AssetUtil.CrcFullName(name, "models", false) + ".eso");
+            ESO eso;
+            do
+            {
+                Matrix3D matrix = GetMatrix(eso = ESO.FromFile(path));
+                if (parentMatrix.HasValue) matrix *= parentMatrix.Value;
+                foreach (ESOModel model in eso.Models)
+                {
+                    Vec3 offset = new Vec3(pos.X + 0.5f, pos.Z + 0.5f, pos.Y + 0.5f);
+                    for (int i = 0; i < model.Vertices.Count; i++)
+                    {
+                        model.Vertices[i] += offset;
+                    }
+
+                    BitmapImage image;
+                    var material = new DiffuseMaterial(Brushes.White);
+
+                    var geom = new MeshGeometry3D
+                    {
+                        Positions = new Point3DCollection(model.Vertices.Select(AssetHelper.ConvertVertex)),
+                        Normals = new Vector3DCollection(model.Normals.Select(AssetHelper.ConvertVector))
+                    };
+
+                    var ema = EMA.FromFile(Path.Combine(MainWindow.Edge.ModelsDirectory, model.MaterialAsset + ".ema"));
+                    if (ema.Textures.Length > 0 && model.HasTexCoords)
+                    {
+                        geom.TextureCoordinates = new PointCollection(model.TexCoords.Select(ConvertTexCoord));
+                        var etx = ETX.FromFile(Path.Combine(MainWindow.Edge.TexturesDirectory,
+                                                            ema.Textures[0].Asset + ".etx"));
+                        image = etx.GetBitmap().GetBitmapImage();
+                        Viewport2DVisual3D.SetIsVisualHostMaterial(material, true);
+                    }
+                    else
+                    {
+                        image = new BitmapImage();
+                    }
+
+                    if (!parentMatrix.HasValue && model.HasColors)
+                    {
+                        MessageBox.Show(this, Localization.ModelColorWarning + Environment.NewLine + Localization.ModelColorWarningDetails,
+                                        Localization.Warning, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+
+                    for (var i = model.Vertices.Count - 1; i >= 0; i--)
+                    {
+                        geom.TriangleIndices.Add(i);
+                    }
+
+                    var transform = new MatrixTransform3D(matrix);
+                    Model.Children.Add(new Viewport2DVisual3D
+                    {
+                        Geometry = geom,
+                        Material = material,
+                        Visual = new Image { Source = image },
+                        Transform = transform
+                    });
+                    if (!DebugMode)
+                    {
+                        continue;
+                    }
+
+                    var lines = new ScreenSpaceLines3D { Color = Colors.Red, Transform = transform };
+                    Model.Children.Add(lines);
+                    var k = 0;
+                    while (k < model.Vertices.Count)
+                    {
+                        lines.Points.Add(AssetHelper.ConvertVertex(model.Vertices[k]));
+                        lines.Points.Add(AssetHelper.ConvertVertex(model.Vertices[k + 1]));
+                        lines.Points.Add(AssetHelper.ConvertVertex(model.Vertices[k + 1]));
+                        lines.Points.Add(AssetHelper.ConvertVertex(model.Vertices[k + 2]));
+                        lines.Points.Add(AssetHelper.ConvertVertex(model.Vertices[k + 2]));
+                        lines.Points.Add(AssetHelper.ConvertVertex(model.Vertices[k]));
+                        k += 3;
+                    }
+                }
+                if (!DrawChildModels)
+                {
+                    return;
+                }
+
+                if (!eso.Header.NodeChild.IsZero())
+                {
+                    DrawElement(Path.Combine(Path.GetDirectoryName(path), eso.Header.NodeChild + ".eso"), pos, matrix);
+                }
+
                 path = Path.Combine(Path.GetDirectoryName(path), eso.Header.NodeSibling + ".eso");
             }
             while (!eso.Header.NodeSibling.IsZero());

@@ -659,15 +659,32 @@ namespace Mygod.Edge.Tool
 
         private void ViewInModelViewer(object sender, RoutedEventArgs e)
         {
-            var level = LevelList.SelectedItem as Level;
-            if (level == null) return;
-            ModelNameBox.Text = Path.GetFileNameWithoutExtension(level.FilePath);
-            DrawModelTree(sender, e);
-            if(ModelWindow != null)
+            Level level = LevelList.SelectedItem as Level;
+            if (level == null)
+            {
+                return;
+            }
+
+            if (ModelWindow == null)
+            {
+                (ModelWindow = new ModelWindow(ModelNameBox.Text)).Show();
+            }
+            else
             {
                 ModelWindow.Clear(sender, e);
+                ModelWindow.SetModelName(ModelNameBox.Text);
             }
-            ViewModel(sender, e);
+
+            ModelWindow.DrawChildModels = true;
+            ModelWindow.DebugMode = false;
+
+            string path = Path.Combine(Edge.ModelsDirectory, AssetUtil.CrcFullName(Path.GetFileNameWithoutExtension(level.FilePath), "models", false) + ".eso");
+            ModelWindow.Draw(path);
+
+            // load exit 
+            ModelWindow.DrawElement("finish", level.ExitPoint - new Point3D16(0, (short) level.Size.Length, 0));
+
+            ModelWindow.Activate();
         }
 
         private void ModifyMappingXml(object sender, RoutedEventArgs e)
@@ -1156,14 +1173,18 @@ namespace Mygod.Edge.Tool
         public static ModelWindow ModelWindow;
         private void ViewModel(object sender, RoutedEventArgs e)
         {
-            var item = ModelTreeView.SelectedItem as TreeViewItem;
+            TreeViewItem item = ModelTreeView.SelectedItem as TreeViewItem;
             if (item == null)
             {
                 item = ModelTreeView.Items.GetItemAt(0) as TreeViewItem;
             }
 
-            var path = item.Tag.ToString();
-            if (!path.EndsWith(".eso", false, CultureInfo.InvariantCulture)) return;
+            string path = item.Tag.ToString();
+            if (!path.EndsWith(".eso", false, CultureInfo.InvariantCulture))
+            {
+                return;
+            }
+
             if (ModelWindow == null)
             {
                 (ModelWindow = new ModelWindow(ModelNameBox.Text)).Show();
