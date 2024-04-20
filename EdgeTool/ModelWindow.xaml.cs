@@ -14,6 +14,7 @@ using Mygod.Edge.Tool.LibTwoTribes;
 using Mygod.Edge.Tool.LibTwoTribes.Util;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using _3DTools;
+using System.Collections.Generic;
 
 namespace Mygod.Edge.Tool
 {
@@ -97,18 +98,34 @@ namespace Mygod.Edge.Tool
         {
             string path = Path.Combine(MainWindow.Edge.ModelsDirectory, AssetUtil.CrcFullName(name, "models", false) + ".eso");
             ESO eso;
+
+            Dictionary<string, Vector3D> offsets = new Dictionary<string, Vector3D>();
+            offsets.Add("platform", new Vector3D(0, -1, 0));
+            offsets.Add("platform_active", new Vector3D(0, -1, 0));
+            offsets.Add("platform_edges_active", new Vector3D(0, -1, 0));
+            offsets.Add("platform_small", new Vector3D(0, -1, 0));
+            offsets.Add("platform_active_small", new Vector3D(0, -1, 0));
+            offsets.Add("platform_edges_active_small", new Vector3D(0, -1, 0));
+            offsets.Add("switch", new Vector3D(0, -0.5, 0));
+            offsets.Add("switch_ghost", new Vector3D(0, -0.5, 0));
+            // offsets.Add("prism", new Vector3D(3, 3, 3));
+
+            Vector3D offset = new Vector3D(pos.X + 0.5f, pos.Z + 0.5f, pos.Y + 0.5f);
+            if (offsets.ContainsKey(name)) {
+                offset += offsets[name];
+            }
+
             do
             {
                 Matrix3D matrix = GetMatrix(eso = ESO.FromFile(path));
-                if (parentMatrix.HasValue) matrix *= parentMatrix.Value;
+                if (parentMatrix.HasValue)
+                {
+                    matrix *= parentMatrix.Value;
+                }
+                matrix.Translate(offset);
+
                 foreach (ESOModel model in eso.Models)
                 {
-                    Vec3 offset = new Vec3(pos.X + 0.5f, pos.Z + 0.5f, pos.Y + 0.5f);
-                    for (int i = 0; i < model.Vertices.Count; i++)
-                    {
-                        model.Vertices[i] += offset;
-                    }
-
                     BitmapImage image;
                     var material = new DiffuseMaterial(Brushes.White);
 
@@ -132,18 +149,12 @@ namespace Mygod.Edge.Tool
                         image = new BitmapImage();
                     }
 
-                    if (!parentMatrix.HasValue && model.HasColors)
-                    {
-                        MessageBox.Show(this, Localization.ModelColorWarning + Environment.NewLine + Localization.ModelColorWarningDetails,
-                                        Localization.Warning, MessageBoxButton.OK, MessageBoxImage.Warning);
-                    }
-
-                    for (var i = model.Vertices.Count - 1; i >= 0; i--)
+                    for (int i = model.Vertices.Count - 1; i >= 0; i--)
                     {
                         geom.TriangleIndices.Add(i);
                     }
 
-                    var transform = new MatrixTransform3D(matrix);
+                    MatrixTransform3D transform = new MatrixTransform3D(matrix);
                     Model.Children.Add(new Viewport2DVisual3D
                     {
                         Geometry = geom,
@@ -151,28 +162,6 @@ namespace Mygod.Edge.Tool
                         Visual = new Image { Source = image },
                         Transform = transform
                     });
-                    if (!DebugMode)
-                    {
-                        continue;
-                    }
-
-                    var lines = new ScreenSpaceLines3D { Color = Colors.Red, Transform = transform };
-                    Model.Children.Add(lines);
-                    var k = 0;
-                    while (k < model.Vertices.Count)
-                    {
-                        lines.Points.Add(AssetHelper.ConvertVertex(model.Vertices[k]));
-                        lines.Points.Add(AssetHelper.ConvertVertex(model.Vertices[k + 1]));
-                        lines.Points.Add(AssetHelper.ConvertVertex(model.Vertices[k + 1]));
-                        lines.Points.Add(AssetHelper.ConvertVertex(model.Vertices[k + 2]));
-                        lines.Points.Add(AssetHelper.ConvertVertex(model.Vertices[k + 2]));
-                        lines.Points.Add(AssetHelper.ConvertVertex(model.Vertices[k]));
-                        k += 3;
-                    }
-                }
-                if (!DrawChildModels)
-                {
-                    return;
                 }
 
                 if (!eso.Header.NodeChild.IsZero())

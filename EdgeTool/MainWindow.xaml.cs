@@ -681,8 +681,68 @@ namespace Mygod.Edge.Tool
             string path = Path.Combine(Edge.ModelsDirectory, AssetUtil.CrcFullName(Path.GetFileNameWithoutExtension(level.FilePath), "models", false) + ".eso");
             ModelWindow.Draw(path);
 
+            Point3D16 y = new Point3D16(0, (short) level.Size.Length, 0);
             // load exit 
-            ModelWindow.DrawElement("finish", level.ExitPoint - new Point3D16(0, (short) level.Size.Length, 0));
+            ModelWindow.DrawElement("finish", level.ExitPoint - y);
+
+            foreach (FallingPlatform p in level.FallingPlatforms)
+            {
+                ModelWindow.DrawElement("falling_platform", p.Position - y);
+            }
+
+            foreach (OtherCube c in level.OtherCubes)
+            {
+                ModelWindow.DrawElement("holoswitch", c.PositionTrigger - y);
+            }
+
+            foreach (Prism p in level.Prisms)
+            {
+                ModelWindow.DrawElement("prism", p.Position - y);
+            }
+
+            foreach (MovingPlatform p in level.MovingPlatforms)
+            {
+                if (p.FullBlock)
+                {
+                    ModelWindow.DrawElement("platform", p.Waypoints[0].Position - y);
+                    if (p.AutoStart)
+                    {
+                        ModelWindow.DrawElement("platform_edges_active", p.Waypoints[0].Position - y);
+                    }
+                }
+                else
+                {
+                    ModelWindow.DrawElement("platform_small", p.Waypoints[0].Position - y);
+                    if (p.AutoStart)
+                    {
+                        ModelWindow.DrawElement("platform_edges_active_small", p.Waypoints[0].Position - y);
+                    }
+                }
+            }
+
+            foreach (Button b in level.Buttons)
+            {
+                string type = b.Visible == NullableBoolean.True ? "switch" : "switch_ghost";
+                if (b.MovingPlatformID != null)
+                {
+                    ModelWindow.DrawElement(type, level.MovingPlatforms[b.MovingPlatformID.Index].Waypoints[0].Position - y);
+                } else
+                {
+                    ModelWindow.DrawElement(type, b.Position - y);
+                }
+            }
+
+            foreach (Resizer r in level.Resizers)
+            {
+                if (r.Direction == ResizeDirection.Grow)
+                {
+                    ModelWindow.DrawElement("shrinker_tobig", r.Position - y);
+                }
+                else
+                {
+                    ModelWindow.DrawElement("shrinker_tomini", r.Position - y);
+                }
+            }
 
             ModelWindow.Activate();
         }
