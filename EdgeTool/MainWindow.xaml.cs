@@ -698,6 +698,9 @@ namespace Mygod.Edge.Tool
             foreach (Prism p in level.Prisms)
             {
                 ModelWindow.DrawElement("prism", p.Position - y);
+                ModelWindow.ApplyAnimationToElement("prism", p.Position - y);
+                ModelWindow.DrawElement("prism_shadow", p.Position - y);
+                //ModelWindow.ApplyAnimationToElement("prism_shadow", p.Position - y);
             }
 
             foreach (MovingPlatform p in level.MovingPlatforms)
@@ -742,6 +745,13 @@ namespace Mygod.Edge.Tool
                 {
                     ModelWindow.DrawElement("shrinker_tomini", r.Position - y);
                 }
+            }
+
+            foreach (Bumper b in level.Bumpers)
+            {
+                ModelWindow.DrawElement("bumper_bottom", b.Position - y);
+                ModelWindow.DrawElement("bumper_right", b.Position - y);
+                ModelWindow.DrawElement("bumper_roof", b.Position - y);
             }
 
             ModelWindow.Activate();

@@ -86,9 +86,16 @@ namespace Mygod.Edge.Tool
                         k += 3;
                     }
                 }
-                if (!DrawChildModels) return;
+                if (!DrawChildModels)
+                {
+                    return;
+                }
+
                 if (!eso.Header.NodeChild.IsZero())
+                {
                     Draw(Path.Combine(Path.GetDirectoryName(path), eso.Header.NodeChild + ".eso"), matrix);
+                }
+
                 path = Path.Combine(Path.GetDirectoryName(path), eso.Header.NodeSibling + ".eso");
             }
             while (!eso.Header.NodeSibling.IsZero());
@@ -97,6 +104,7 @@ namespace Mygod.Edge.Tool
         public void DrawElement(string name, Point3D16 pos, Matrix3D? parentMatrix = null)
         {
             string path = Path.Combine(MainWindow.Edge.ModelsDirectory, AssetUtil.CrcFullName(name, "models", false) + ".eso");
+
             ESO eso;
 
             Dictionary<string, Vector3D> offsets = new Dictionary<string, Vector3D>();
@@ -108,7 +116,6 @@ namespace Mygod.Edge.Tool
             offsets.Add("platform_edges_active_small", new Vector3D(0, -1, 0));
             offsets.Add("switch", new Vector3D(0, -0.5, 0));
             offsets.Add("switch_ghost", new Vector3D(0, -0.5, 0));
-            // offsets.Add("prism", new Vector3D(3, 3, 3));
 
             Vector3D offset = new Vector3D(pos.X + 0.5f, pos.Z + 0.5f, pos.Y + 0.5f);
             if (offsets.ContainsKey(name)) {
@@ -123,19 +130,23 @@ namespace Mygod.Edge.Tool
                     matrix *= parentMatrix.Value;
                 }
                 matrix.Translate(offset);
+                if (name.Equals("prism_shadow"))
+                {
+                    matrix.ScaleAt(new Vector3D(1, 0.01, 1), new Point3D(pos.X, pos.Z, pos.Y));
+                }
 
                 foreach (ESOModel model in eso.Models)
                 {
                     BitmapImage image;
-                    var material = new DiffuseMaterial(Brushes.White);
+                    DiffuseMaterial material = new DiffuseMaterial(Brushes.White);
 
-                    var geom = new MeshGeometry3D
+                    MeshGeometry3D geom = new MeshGeometry3D
                     {
                         Positions = new Point3DCollection(model.Vertices.Select(AssetHelper.ConvertVertex)),
                         Normals = new Vector3DCollection(model.Normals.Select(AssetHelper.ConvertVector))
                     };
 
-                    var ema = EMA.FromFile(Path.Combine(MainWindow.Edge.ModelsDirectory, model.MaterialAsset + ".ema"));
+                    EMA ema = EMA.FromFile(Path.Combine(MainWindow.Edge.ModelsDirectory, model.MaterialAsset + ".ema"));
                     if (ema.Textures.Length > 0 && model.HasTexCoords)
                     {
                         geom.TextureCoordinates = new PointCollection(model.TexCoords.Select(ConvertTexCoord));
@@ -166,7 +177,7 @@ namespace Mygod.Edge.Tool
 
                 if (!eso.Header.NodeChild.IsZero())
                 {
-                    DrawElement(Path.Combine(Path.GetDirectoryName(path), eso.Header.NodeChild + ".eso"), pos, matrix);
+                    Draw(Path.Combine(Path.GetDirectoryName(path), eso.Header.NodeChild + ".eso"), matrix);
                 }
 
                 path = Path.Combine(Path.GetDirectoryName(path), eso.Header.NodeSibling + ".eso");
@@ -224,6 +235,34 @@ namespace Mygod.Edge.Tool
                 GetAnimation(repeatBehavior, ean.Header.Duration, ean.BlockTranslateX));
         }
 
+        public void ApplyAnimationToElement(string name, Point3D16 pos)
+        {
+            string path = Path.Combine(MainWindow.Edge.ModelsDirectory, AssetUtil.CrcFullName(name, "models", false) + ".ean"); // maybe also look for children
+            EAN ean = EAN.FromFile(path);
+            Transform3DGroup transforms = new Transform3DGroup();
+            AxisAngleRotation3D x = new AxisAngleRotation3D(new Vector3D(1, 0, 0), ean.BlockRotateX.DefaultValue * ToDegree);
+            AxisAngleRotation3D y = new AxisAngleRotation3D(new Vector3D(0, 1, 0), ean.BlockRotateY.DefaultValue * ToDegree);
+            AxisAngleRotation3D z = new AxisAngleRotation3D(new Vector3D(0, 0, 1), ean.BlockRotateZ.DefaultValue * ToDegree);
+            transforms.Children.Add(new ScaleTransform3D(ean.BlockScaleX.DefaultValue, ean.BlockScaleY.DefaultValue, ean.BlockScaleZ.DefaultValue));
+            transforms.Children.Add(new RotateTransform3D(z));
+            transforms.Children.Add(new RotateTransform3D(y));
+            transforms.Children.Add(new RotateTransform3D(x));
+            transforms.Children.Add(new TranslateTransform3D(pos.X + 0.5, pos.Z + 0.5, pos.Y + 0.5));
+
+            Model.Children[Model.Children.Count - 1].Transform = transforms;
+
+            RepeatBehavior repeatBehavior = RepeatBehavior.Forever;
+            transforms.Children[0].BeginAnimation(ScaleTransform3D.ScaleZProperty, GetAnimation(repeatBehavior, ean.Header.Duration, ean.BlockScaleZ));
+            transforms.Children[0].BeginAnimation(ScaleTransform3D.ScaleYProperty, GetAnimation(repeatBehavior, ean.Header.Duration, ean.BlockScaleY));
+            transforms.Children[0].BeginAnimation(ScaleTransform3D.ScaleXProperty, GetAnimation(repeatBehavior, ean.Header.Duration, ean.BlockScaleX));
+            z.BeginAnimation(AxisAngleRotation3D.AngleProperty, GetAnimation(repeatBehavior, ean.Header.Duration, ean.BlockRotateZ, ToDegree));
+            y.BeginAnimation(AxisAngleRotation3D.AngleProperty, GetAnimation(repeatBehavior, ean.Header.Duration, ean.BlockRotateY, ToDegree));
+            x.BeginAnimation(AxisAngleRotation3D.AngleProperty, GetAnimation(repeatBehavior, ean.Header.Duration, ean.BlockRotateX, ToDegree));
+            //transforms.Children[4].BeginAnimation(TranslateTransform3D.OffsetZProperty, GetAnimation(repeatBehavior, ean.Header.Duration, ean.BlockTranslateZ));
+            //transforms.Children[4].BeginAnimation(TranslateTransform3D.OffsetYProperty, GetAnimation(repeatBehavior, ean.Header.Duration, ean.BlockTranslateY));
+            //transforms.Children[4].BeginAnimation(TranslateTransform3D.OffsetXProperty, GetAnimation(repeatBehavior, ean.Header.Duration, ean.BlockTranslateX));
+        }
+
         private static TwoTribesAnimation GetAnimation(RepeatBehavior repeatBehavior, float duration,
                                                                   KeyframeBlock block, double k = 1)
         {
@@ -234,7 +273,7 @@ namespace Mygod.Edge.Tool
             //    new LinearDoubleKeyFrame(keyframe.Value * k, TimeSpan.FromSeconds(keyframe.Time / 30.0)));
             //return animation;
             return new TwoTribesAnimation(block, k)
-                { RepeatBehavior = repeatBehavior, Duration = new Duration(TimeSpan.FromSeconds(duration / 30D)) };
+            { RepeatBehavior = repeatBehavior, Duration = new Duration(TimeSpan.FromSeconds(duration / 30D)) };
         }
 
         private const double ToDegree = 180 / Math.PI;
@@ -259,13 +298,19 @@ namespace Mygod.Edge.Tool
 
         private void Dragging(object sender, MouseEventArgs e)
         {
-            if (!dragging) return;
-            var position = e.GetPosition(Grid);
+            if (!dragging)
+            {
+                return;
+            }
+
+            Point position = e.GetPosition(Grid);
             double deltaX = mouseDown.X - position.X, deltaY = mouseDown.Y - position.Y;
             if (e.LeftButton == MouseButtonState.Pressed)
+            {
                 Camera.Position = new Point3D(mouseDownPosition.X + (deltaX + deltaY) * Camera.FieldOfView / 450,
                                               mouseDownPosition.Y,
                                               mouseDownPosition.Z + (deltaY - deltaX) * Camera.FieldOfView / 450);
+            }
             else if (e.RightButton == MouseButtonState.Pressed) Camera.Position =
                 new Point3D(mouseDownPosition.X, mouseDownPosition.Y - deltaY * Camera.FieldOfView / 450, mouseDownPosition.Z);
         }
