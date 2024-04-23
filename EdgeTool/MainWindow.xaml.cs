@@ -682,7 +682,7 @@ namespace Mygod.Edge.Tool
             ModelWindow.Draw(path);
 
             Point3D16 y = new Point3D16(0, (short) level.Size.Length, 0);
-            // load exit 
+            
             ModelWindow.DrawElement("finish", level.ExitPoint - y);
 
             foreach (FallingPlatform p in level.FallingPlatforms)
@@ -698,9 +698,9 @@ namespace Mygod.Edge.Tool
             foreach (Prism p in level.Prisms)
             {
                 ModelWindow.DrawElement("prism", p.Position - y);
-                ModelWindow.ApplyAnimationToElement("prism", p.Position - y);
+                ModelWindow.ApplyAnimationToElement("prism");
                 ModelWindow.DrawElement("prism_shadow", p.Position - y);
-                //ModelWindow.ApplyAnimationToElement("prism_shadow", p.Position - y);
+                ModelWindow.ApplyAnimationToElement("prism_shadow");
             }
 
             foreach (MovingPlatform p in level.MovingPlatforms)
@@ -729,7 +729,8 @@ namespace Mygod.Edge.Tool
                 if (b.MovingPlatformID != null)
                 {
                     ModelWindow.DrawElement(type, level.MovingPlatforms[b.MovingPlatformID.Index].Waypoints[0].Position - y);
-                } else
+                }
+                else
                 {
                     ModelWindow.DrawElement(type, b.Position - y);
                 }
@@ -739,19 +740,24 @@ namespace Mygod.Edge.Tool
             {
                 if (r.Direction == ResizeDirection.Grow)
                 {
-                    ModelWindow.DrawElement("shrinker_tobig", r.Position - y);
+                    ModelWindow.DrawElement("shrinker_tomini", r.Position - y);
+                    ModelWindow.ApplyAnimationToElement("shrinker_tobig");
                 }
                 else
                 {
                     ModelWindow.DrawElement("shrinker_tomini", r.Position - y);
+                    ModelWindow.ApplyAnimationToElement("shrinker_tomini");
                 }
             }
 
             foreach (Bumper b in level.Bumpers)
             {
                 ModelWindow.DrawElement("bumper_bottom", b.Position - y);
+                ModelWindow.ApplyAnimationToElement("bumper_bottom");
                 ModelWindow.DrawElement("bumper_right", b.Position - y);
+                ModelWindow.ApplyAnimationToElement("bumper_right");
                 ModelWindow.DrawElement("bumper_roof", b.Position - y);
+                //ModelWindow.ApplyAnimationToElement("bumper_roof");
             }
 
             ModelWindow.Activate();
