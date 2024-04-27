@@ -12,7 +12,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using Mygod.Edge.Tool.LibTwoTribes;
 using Mygod.Edge.Tool.LibTwoTribes.Util;
-using Microsoft.WindowsAPICodePack.Dialogs;
 using _3DTools;
 using System.Collections.Generic;
 
@@ -303,6 +302,43 @@ namespace Mygod.Edge.Tool
                 path = Path.Combine(Path.GetDirectoryName(path), ean.Header.NodeSibling + ".ean");
             } while (!ean.Header.NodeSibling.IsZero());
             
+        }
+
+        public void AnimateMovingPlatform(MovingPlatform p)
+        {
+            Transform3DGroup transforms = new Transform3DGroup();
+            TranslateTransform3D transform = new TranslateTransform3D();
+
+            transforms.Children.Add(Model.Children[Model.Children.Count - 1].Transform);
+            transforms.Children.Add(transform);
+
+            RepeatBehavior behavior = p.LoopStartIndex == 0 ? new RepeatBehavior(1) : RepeatBehavior.Forever;
+            DoubleAnimationUsingKeyFrames animationX = new DoubleAnimationUsingKeyFrames() { RepeatBehavior = behavior };
+            DoubleAnimationUsingKeyFrames animationY = new DoubleAnimationUsingKeyFrames() { RepeatBehavior = behavior };
+            DoubleAnimationUsingKeyFrames animationZ = new DoubleAnimationUsingKeyFrames() { RepeatBehavior = behavior };
+
+            Point3D16 start = p.Waypoints[0].Position;
+            TimeSpan timer = TimeSpan.Zero;
+            foreach (Waypoint w in p.Waypoints)
+            {
+                Point3D16 pos = w.Position - start;
+
+                timer += TimeSpan.FromSeconds(w.TravelTime / 30D);
+                animationX.KeyFrames.Add(new LinearDoubleKeyFrame(pos.X, timer));
+                animationY.KeyFrames.Add(new LinearDoubleKeyFrame(pos.Z, timer));
+                animationZ.KeyFrames.Add(new LinearDoubleKeyFrame(pos.Y, timer));
+
+                timer += TimeSpan.FromSeconds(w.PauseTime / 30D);
+                animationX.KeyFrames.Add(new LinearDoubleKeyFrame(pos.X, timer));
+                animationY.KeyFrames.Add(new LinearDoubleKeyFrame(pos.Z, timer));
+                animationZ.KeyFrames.Add(new LinearDoubleKeyFrame(pos.Y, timer));
+            }
+
+            transform.BeginAnimation(TranslateTransform3D.OffsetXProperty, animationX);
+            transform.BeginAnimation(TranslateTransform3D.OffsetYProperty, animationY);
+            transform.BeginAnimation(TranslateTransform3D.OffsetZProperty, animationZ);
+
+            Model.Children[Model.Children.Count - 1].Transform = transforms;
         }
 
         private static TwoTribesAnimation GetAnimation(RepeatBehavior repeatBehavior, float duration,

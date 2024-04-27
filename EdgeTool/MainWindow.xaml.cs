@@ -705,21 +705,14 @@ namespace Mygod.Edge.Tool
 
             foreach (MovingPlatform p in level.MovingPlatforms)
             {
-                if (p.FullBlock)
+                string platform = p.FullBlock ? "platform" : "platform_small";
+                ModelWindow.DrawElement(platform, p.Waypoints[0].Position - y);
+
+                if (p.AutoStart)
                 {
-                    ModelWindow.DrawElement("platform", p.Waypoints[0].Position - y);
-                    if (p.AutoStart)
-                    {
-                        ModelWindow.DrawElement("platform_edges_active", p.Waypoints[0].Position - y);
-                    }
-                }
-                else
-                {
-                    ModelWindow.DrawElement("platform_small", p.Waypoints[0].Position - y);
-                    if (p.AutoStart)
-                    {
-                        ModelWindow.DrawElement("platform_edges_active_small", p.Waypoints[0].Position - y);
-                    }
+                    ModelWindow.AnimateMovingPlatform(p);
+                    ModelWindow.DrawElement("platform_edges_active" + (p.FullBlock ? "" : "_small"), p.Waypoints[0].Position - y);
+                    ModelWindow.AnimateMovingPlatform(p);
                 }
             }
 
@@ -728,7 +721,12 @@ namespace Mygod.Edge.Tool
                 string type = b.Visible == NullableBoolean.True ? "switch" : "switch_ghost";
                 if (b.MovingPlatformID != null)
                 {
-                    ModelWindow.DrawElement(type, level.MovingPlatforms[b.MovingPlatformID.Index].Waypoints[0].Position - y);
+                    MovingPlatform p = level.MovingPlatforms[b.MovingPlatformID.Index];
+                    ModelWindow.DrawElement(type, p.Waypoints[0].Position - y);
+                    if (p.AutoStart)
+                    {
+                        ModelWindow.AnimateMovingPlatform(p);
+                    }
                 }
                 else
                 {
