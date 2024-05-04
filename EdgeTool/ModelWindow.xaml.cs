@@ -136,7 +136,7 @@ namespace Mygod.Edge.Tool
                 foreach (ESOModel model in eso.Models)
                 {
                     BitmapImage image;
-                    DiffuseMaterial material = new DiffuseMaterial(Brushes.White);
+                    DiffuseMaterial material = new DiffuseMaterial(new SolidColorBrush(new Color() { A = 255, R = 128, G = 128, B = 128}));
 
                     MeshGeometry3D geom = new MeshGeometry3D
                     {
@@ -148,7 +148,7 @@ namespace Mygod.Edge.Tool
                     if (ema.Textures.Length > 0 && model.HasTexCoords)
                     {
                         geom.TextureCoordinates = new PointCollection(model.TexCoords.Select(ConvertTexCoord));
-                        var etx = ETX.FromFile(Path.Combine(MainWindow.Edge.TexturesDirectory,
+                        ETX etx = ETX.FromFile(Path.Combine(MainWindow.Edge.TexturesDirectory,
                                                             ema.Textures[0].Asset + ".etx"));
                         image = etx.GetBitmap().GetBitmapImage();
                         Viewport2DVisual3D.SetIsVisualHostMaterial(material, true);
@@ -312,6 +312,7 @@ namespace Mygod.Edge.Tool
             transforms.Children.Add(Model.Children[Model.Children.Count - 1].Transform);
             transforms.Children.Add(transform);
 
+            // Repeating animation (everything after LoopStartIndex)
             RepeatBehavior behavior = p.LoopStartIndex == 0 ? new RepeatBehavior(1) : RepeatBehavior.Forever;
             DoubleAnimationUsingKeyFrames animationX = new DoubleAnimationUsingKeyFrames() { RepeatBehavior = behavior };
             DoubleAnimationUsingKeyFrames animationY = new DoubleAnimationUsingKeyFrames() { RepeatBehavior = behavior };
@@ -319,8 +320,9 @@ namespace Mygod.Edge.Tool
 
             Point3D16 start = p.Waypoints[0].Position;
             TimeSpan timer = TimeSpan.Zero;
-            foreach (Waypoint w in p.Waypoints)
+            for (int i = p.LoopStartIndex == 0 ? 0 : p.LoopStartIndex - 1; i < p.Waypoints.Count; i++)
             {
+                Waypoint w = p.Waypoints[i];
                 Point3D16 pos = w.Position - start;
 
                 timer += TimeSpan.FromSeconds(w.TravelTime / 30D);
@@ -332,6 +334,39 @@ namespace Mygod.Edge.Tool
                 animationX.KeyFrames.Add(new LinearDoubleKeyFrame(pos.X, timer));
                 animationY.KeyFrames.Add(new LinearDoubleKeyFrame(pos.Z, timer));
                 animationZ.KeyFrames.Add(new LinearDoubleKeyFrame(pos.Y, timer));
+            }
+
+            // Non-repeating start animation (everything before LoopStartIndex)
+            if (p.LoopStartIndex > 1)
+            {
+                DoubleAnimationUsingKeyFrames startX = new DoubleAnimationUsingKeyFrames() { RepeatBehavior = new RepeatBehavior(1) };
+                DoubleAnimationUsingKeyFrames startY = new DoubleAnimationUsingKeyFrames() { RepeatBehavior = new RepeatBehavior(1) };
+                DoubleAnimationUsingKeyFrames startZ = new DoubleAnimationUsingKeyFrames() { RepeatBehavior = new RepeatBehavior(1) };
+
+                timer = TimeSpan.Zero;
+                for (int i = 0; i < p.LoopStartIndex - 1; i++)
+                {
+                    Waypoint w = p.Waypoints[i];
+                    Point3D16 pos = w.Position - start;
+
+                    timer += TimeSpan.FromSeconds(w.TravelTime / 30D);
+                    startX.KeyFrames.Add(new LinearDoubleKeyFrame(pos.X, timer));
+                    startY.KeyFrames.Add(new LinearDoubleKeyFrame(pos.Z, timer));
+                    startZ.KeyFrames.Add(new LinearDoubleKeyFrame(pos.Y, timer));
+
+                    timer += TimeSpan.FromSeconds(w.PauseTime / 30D);
+                    startX.KeyFrames.Add(new LinearDoubleKeyFrame(pos.X, timer));
+                    startY.KeyFrames.Add(new LinearDoubleKeyFrame(pos.Z, timer));
+                    startZ.KeyFrames.Add(new LinearDoubleKeyFrame(pos.Y, timer));
+                }
+
+                animationX.BeginTime = timer;
+                animationY.BeginTime = timer;
+                animationZ.BeginTime = timer;
+
+                transform.BeginAnimation(TranslateTransform3D.OffsetXProperty, startX);
+                transform.BeginAnimation(TranslateTransform3D.OffsetYProperty, startY);
+                transform.BeginAnimation(TranslateTransform3D.OffsetZProperty, startZ);
             }
 
             transform.BeginAnimation(TranslateTransform3D.OffsetXProperty, animationX);
